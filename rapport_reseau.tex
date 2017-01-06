@@ -17,21 +17,38 @@
 
 \abstract{Ce rapport présente une explication du travail réalisé pour le cadre du projet de morpion en réseau, la justification des choix effectués et les améliorations qui auraient pu être apportées. }
 
+\chapter{Introduction}
+\quad Pour implémenter le jeu de morpion aveugle en réseau, j'ai utilisé deux fichiers python, server.py et client.py. Les données émises entre le serveur et les clients sont des entiers, convertis en chaîne de caractères puis en byte (par la méthode \textit{encode()} et envoyés par la méthode \textit{send}. Ces entiers sont inscrits, à l'identique, sous forme de constantes déclarées au début des deux fichiers.   
+
 \chapter{Partie Serveur}
-\quad Le code du serveur est constitué de deux parties principales, la boucle while dans le main qui permet de savoir d'enregistrer de nouvelle connexion de client, et le thread game qui permet de démarrer la partiecd ..
-cd .
+\quad Le code du serveur est constitué de deux parties principales, la boucle while dans le main qui permet de d'enregistrer de nouvelles connexions de client, et le thread game qui permet de démarrer la partie et gérer le jeu. Avant cela on initialise le serveur puis on le lance, on créer également le thread.
+
 \section{Boucle principale}
-
-\quad 
-
+\quad La boucle principale de server.py sert à stocker les connexions entrantes au serveur. Pour chaque nouvelle connexion on incrémente une variable qui nous permet de savoir si cette personne sera un joueur ou un spectateur. Le type de client se fait en fonction de l'ordre d'arrivée : les deux premiers seront les joueurs, les autres seront spectateurs. Ces connexions sont enregistrées dans deux tableaux. Cette boucle est infinie pour que le serveur ne se déconnecte pas.
 
 \newpage
 
 \section{Thread game}
 
-\quad 
+\quad Une fois le thread game lancé, il attend la connexion d'au moins deux joueurs pour envoyer le message annonçant le début d'une partie. Après cela le joueur 2 devient le joueur actif, il est choisi pour commencer, cela permet de rendre l'exécution du premier coup plus rapide (dans le cas où le joueur 1 aurait attendu plusieurs secondes avant la connexion du second).\\
+On rentre ensuite dans une boucle while qui ne se terminera que lorsque la partie sera terminée. On envoie alors un message pour demander au joueur actif de choisir une case, après cela un \textit{time.sleep()} est utilisé pour empêcher le client de réceptionner le contenu de deux envois en même temps et donc de ne pas recevoir une valeur correspondante aux constantes fixées en début de fichier. Cependant il aurait été mieux de demander une demande d'acquittement avant de continuer plutôt que d'utiliser la fonction sleep.\\
+Après avoir reçu la réponse du joueur le programme vérifie que la case choisie est bien vide puis il envoie un message de confirmation au joueur actif, ou un message d'erreur dans le cas contraire.\\
+A la fin de la boucle on change le joueur actif si son coup était valide puis on teste si la partie est terminée grâce aux deux fonctions \textit{gameover() et winner()}.\\
+On envoie enfin un message pour dire que la partie est terminée aux joueurs, puis le tableau de fin de jeu, et finalement le résultat de la partie. 
 
 \chapter{Partie Client}
 
+\quad Le code client est une longue boucle while se terminant à la fin de la partie, cette boucle ne contient que des if, qui, en fonction de la valeur reçue, effectueront un traitement adapté :\\
+\begin{itemize}
+\item Si le jeu débute, un tableau d'aide est affiché dans le terminal.
+\item Si une nouvelle action du joueur est demandée ou si son coup précédent était sur une case utilisée, alors on lui demande de donner une nouvelle case en tapant dans le terminal avec la méthode \textit{input}.
+\item Si le coup que vient d'effectuer le joueur est valide, on affiche une grille avec uniquement ses actions.
+\item Si la partie est terminée ou si le client est un spectateur, on affiche la grille avec l'intégralité des actions des deux joueurs.
+\item Un message est également envoyé pour dire quel joueur est le gagnant ou le perdant de la partie.
+\end{itemize}
+On sort finalement de la boucle while puis on ferme la connexion avec le serveur.
 
-\chapter{Amélioration possible}
+\chapter{Ajout d'un spectateur et éléments à améliorer}
+\quad J'ai essayé d'implémenter la possibilité d'accueillir des spectateurs pour assister à la partie, mais je n'affiche que le tableau de fin de partie, il faudrait l'envoyer pour chaque coup réalisé par l'un des deux joueurs. De plus mon implémentation ne permet pas d'envoyer le tableau à plusieurs spectateurs. Il y a aussi la présence de redondance de code dans mes deux fichiers. Je n'ai également pas réussi à implémenter les autres extensions proposées dans le sujet.
+
+\end{document}  
